@@ -1,0 +1,4 @@
+需要安装模块，其中：
+pylab：
+sudo apt-get install python-numpy python-scipy python-matplotlib
+
