@@ -52,7 +52,7 @@ def handwritingClassTest():
         fileStr = fileNameStr.split('.')[0]
         classNumStr = int(fileStr.split('_')[0])
         vectorUnderTest = img2vector('testDigits/%s' % fileNameStr) # 截取测试集合的名字
-        classifierResult = classify0(vectorUnderTest, trainingMat, hwLabels, 3) # 进行分类， k值为3
+        classifierResult = classify0(vectorUnderTest, trainingMat, hwLabels, 2) # 进行分类， k值为3
         print "the classifier came back with: %d, the real answer is: %d" % (classifierResult, classNumStr)
         if (classifierResult != classNumStr): errorCount += 1.0
     print "\nthe total number of errors is: %d" % errorCount
