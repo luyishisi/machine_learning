@@ -73,12 +73,19 @@ def biKmeans(dataSet, k):
     # step 1: the init cluster is the whole data set
     # 最初的簇是整个数据集合,算
     centroid = mean(dataSet, axis = 0).tolist()[0]
+    # mean 处理之后是matrix([[  22.32695245,  114.25989385]]) 需要用tolist转换 成为图心
     centList = [centroid]
-    
+    # 设定初始中心列表,至少有一个簇组
+
     for i in xrange(numSamples):
         clusterAssment[i, 1] = euclDistance(mat(centroid), dataSet[i, :])**2
+        # 计算每一个点与当前图心的距离
+        # print mat(centroid), dataSet[i, :]
+        # [[  22.32695245  114.25989385]] [[  22.325637  114.25936 ]]
+
 
     while len(centList) < k:
+        # 逐步增加簇数，直到抵达k值
         # min sum of square error
         minSSE = 100000.0
         numCurrCluster = len(centList)
@@ -86,16 +93,26 @@ def biKmeans(dataSet, k):
         for i in range(numCurrCluster):
             # step 2: get samples in cluster i
             pointsInCurrCluster = dataSet[nonzero(clusterAssment[:, 0].A == i)[0], :]
+            # nonzero(a)返回数组a中值不为零的元素的下标，它的返回值是一个长度为a.ndim
+            # (数组a的轴数)的元组，元组的每个元素都是一个整数数组，其值为非零元素的下标在对应轴上的值
+            # point 最终值为
+            #       matrix([[  22.325637,  114.25936 ],
+            #       [  22.325522,  114.259091],
+            #       [  22.328594,  114.256648],
 
             # step 3: cluster it to 2 sub-clusters using k-means
+            # 将在给定的簇上面进行k-均值聚类 一分为二
             centroids, splitClusterAssment = kmeans(pointsInCurrCluster, 2)
 
+
             # step 4: calculate the sum of square error after split this cluster
+            # 计算将该簇一分为二后的总误差
             splitSSE = sum(splitClusterAssment[:, 1])
             notSplitSSE = sum(clusterAssment[nonzero(clusterAssment[:, 0].A != i)[0], 1])
             currSplitSSE = splitSSE + notSplitSSE
 
             # step 5: find the best split cluster which has the min sum of square error
+            # 查找具有最小平方误差和最小平方和的最优分割聚类
             if currSplitSSE < minSSE:
                 minSSE = currSplitSSE
                 bestCentroidToSplit = i
@@ -103,14 +120,17 @@ def biKmeans(dataSet, k):
                 bestClusterAssment = splitClusterAssment.copy()
 
         # step 6: modify the cluster index for adding new cluster
+        # 修改添加新群集的群集索引
         bestClusterAssment[nonzero(bestClusterAssment[:, 0].A == 1)[0], 0] = numCurrCluster
         bestClusterAssment[nonzero(bestClusterAssment[:, 0].A == 0)[0], 0] = bestCentroidToSplit
 
         # step 7: update and append the centroids of the new 2 sub-cluster
+        # 更新和添加新的2子簇的质心
         centList[bestCentroidToSplit] = bestNewCentroids[0, :]
         centList.append(bestNewCentroids[1, :])
 
         # step 8: update the index and error of the samples whose cluster have been changed
+        # 更新已更改群集的样本的索引和错误
         clusterAssment[nonzero(clusterAssment[:, 0].A == bestCentroidToSplit), :] = bestClusterAssment
 
     print 'Congratulations, cluster using bi-kmeans complete!'
@@ -140,6 +160,7 @@ def showCluster(dataSet, k, centroids, clusterAssment):
     # 画出质点，用特殊图型
     for i in range(k):
         plt.plot(centroids[i, 0], centroids[i, 1], mark[i], markersize = 12)
+        print centroids[i, 0], centroids[i, 1]
 
     plt.show()
 
@@ -159,9 +180,14 @@ if __name__ == '__main__':
     dataSet = mat(dataSet)
     # mat 函数，将数组转化为矩阵
 
-    k = 4
+    k = 3
+
+    # 此部分可选择使用k均值还是二分k均值
+
     centroids, clusterAssment = kmeans(dataSet, k)
+    #centroids, clusterAssment = biKmeans(dataSet, k)
 
     ## step 3: show the result
     print "step 3: show the result..."
     showCluster(dataSet, k, centroids, clusterAssment)
+    print 'end'
